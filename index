@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TS FUCK - 專屬交友</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fefce8',
+                            100: '#fef9c3',
+                            200: '#fef08a',
+                            300: '#fde047',
+                            400: '#facc15',
+                            500: '#eab308',
+                            600: '#ca8a04',
+                            700: '#a16207',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-brand-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col justify-center items-center">
+
+    <!-- 主容器 (手機框感，RWD 適應全螢幕) -->
+    <div id="app-container" class="w-full max-w-md bg-white min-h-screen sm:min-h-[800px] sm:rounded-3xl sm:shadow-2xl flex flex-col relative overflow-hidden border border-brand-200">
+
+        <!-- ================= 1. 登入/註冊頁面 (Auth Page) ================= -->
+        <div id="page-auth" class="view-page flex flex-col justify-between p-8 h-full min-h-[750px]">
+            <div class="text-center mt-12">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-brand-100 rounded-full text-brand-600 text-3xl font-black mb-4 shadow-inner">
+                    <i class="fa-solid fa-fire"></i>
+                </div>
+                <h1 class="text-4xl font-black tracking-wider text-gray-900">TS <span class="text-brand-600">FUCK</span></h1>
+                <p class="text-gray-500 mt-2 text-sm">找到屬於你的獨特靈魂與火花</p>
+            </div>
+
+            <div class="space-y-4 my-auto">
+                <div id="auth-error" class="hidden bg-red-50 text-red-500 text-xs p-3 rounded-xl text-center font-medium"></div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">電子郵件</label>
+                    <input type="email" id="auth-email" placeholder="name@example.com" class="w-full px-4 py-3 rounded-xl bg-brand-50 border border-brand-200 focus:outline-none focus:border-brand-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">密碼</label>
+                    <input type="password" id="auth-password" placeholder="••••••••" class="w-full px-4 py-3 rounded-xl bg-brand-50 border border-brand-200 focus:outline-none focus:border-brand-500 text-sm">
+                </div>
+                <div id="register-name-field" class="hidden">
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">你的暱稱</label>
+                    <input type="text" id="auth-name" placeholder="輸入你的稱呼" class="w-full px-4 py-3 rounded-xl bg-brand-50 border border-brand-200 focus:outline-none focus:border-brand-500 text-sm">
+                </div>
+
+                <button onclick="handleAuthSubmit()" id="auth-submit-btn" class="w-full py-3.5 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-xl shadow-md transition transform active:scale-95">
+                    登入帳號
+                </button>
+            </div>
+
+            <div class="text-center text-sm">
+                <span id="auth-switch-text" class="text-gray-500">還沒有帳號？</span>
+                <button onclick="toggleAuthMode()" id="auth-switch-btn" class="text-brand-600 font-bold ml-1 hover:underline">立即註冊</button>
+            </div>
+        </div>
+
+        <!-- ================= 2. 個人檔案與照片上傳設定頁 (Profile Setup) ================= -->
+        <div id="page-profile-setup" class="view-page hidden flex flex-col p-6 h-full overflow-y-auto">
+            <div class="text-center mb-6 mt-4">
+                <h2 class="text-2xl font-black text-gray-900">完善你的個人檔案</h2>
+                <p class="text-gray-500 text-xs mt-1">讓大家第一眼就注意到你</p>
+            </div>
+
+            <div class="flex flex-col items-center mb-6">
+                <div class="relative w-28 h-28 rounded-full bg-brand-100 border-4 border-brand-300 overflow-hidden shadow-md flex items-center justify-center">
+                    <img id="setup-avatar-preview" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300" class="w-full h-full object-cover">
+                    <label class="absolute inset-0 bg-black/30 flex items-center justify-center text-white opacity-0 hover:opacity-100 transition cursor-pointer">
+                        <i class="fa-solid fa-camera text-xl"></i>
+                        <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                    </label>
+                </div>
+                <span class="text-xs text-brand-600 font-semibold mt-2">點擊上方頭貼更換照片</span>
+            </div>
+
+            <div class="space-y-4 flex-1">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">暱稱與年齡</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="setup-name" placeholder="暱稱" class="flex-2 w-2/3 px-4 py-2.5 rounded-xl bg-brand-50 border border-brand-200 text-sm">
+                        <input type="number" id="setup-age" placeholder="年齡" class="flex-1 w-1/3 px-4 py-2.5 rounded-xl bg-brand-50 border border-brand-200 text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">居住地</label>
+                    <input type="text" id="setup-location" placeholder="例如：台北市" class="w-full px-4 py-2.5 rounded-xl bg-brand-50 border border-brand-200 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">關於我 (Bio)</label>
+                    <textarea id="setup-bio" rows="3" placeholder="寫點有趣的自我介紹..." class="w-full px-4 py-2.5 rounded-xl bg-brand-50 border border-brand-200 text-sm resize-none"></textarea>
+                </div>
+            </div>
+
+            <button onclick="saveProfileAndStart()" class="w-full py-3.5 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-xl shadow-md mt-6">
+                開始探索
+            </button>
+        </div>
+
+        <!-- ================= 主頁面骨架 (含底部導覽列) ================= -->
+        <div id="main-app-layout" class="hidden flex flex-col h-full overflow-hidden">
+            
+            <!-- 頂部導覽列 -->
+            <header class="px-6 py-3.5 bg-white border-b border-brand-100 flex items-center justify-between z-10">
+                <div class="flex items-center gap-2">
+                    <span class="text-brand-600 text-xl font-black"><i class="fa-solid fa-fire"></i></span>
+                    <h1 class="text-lg font-black tracking-wide text-gray-900">TS FUCK</h1>
+                </div>
+                <div id="header-avatar" onclick="switchTab('profile')" class="w-9 h-9 rounded-full overflow-hidden border-2 border-brand-400 cursor-pointer shadow-sm">
+                    <img id="nav-user-avatar" src="" class="w-full h-full object-cover">
+                </div>
+            </header>
+
+            <!-- 內容頁籤切換容器 -->
+            <div class="flex-1 overflow-hidden relative bg-brand-50/50">
+
+                <!-- TAB 1: 探索卡片頁 (Discover) -->
+                <div id="tab-discover" class="tab-pane absolute inset-0 flex flex-col items-center justify-center p-4">
+                    <div id="card-stack" class="relative w-full max-w-xs h-[440px] bg-white rounded-3xl shadow-xl overflow-hidden border border-brand-100 flex flex-col">
+                        <!-- 動態載入卡片 -->
+                    </div>
+                    <!-- 互動滑動按鈕 -->
+                    <div class="flex items-center justify-center gap-6 mt-6">
+                        <button onclick="swipeCard('left')" class="w-14 h-14 bg-white hover:bg-red-50 text-red-500 rounded-full shadow-lg border border-red-100 flex items-center justify-center text-xl transition transform active:scale-90">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                        <button onclick="swipeCard('right')" class="w-16 h-16 bg-brand-500 hover:bg-brand-600 text-white rounded-full shadow-xl flex items-center justify-center text-2xl transition transform active:scale-90">
+                            <i class="fa-solid fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TAB 2: 配對與聊天列表頁 (Matches & Chats) -->
+                <div id="tab-chats" class="tab-pane hidden absolute inset-0 flex flex-col p-4 overflow-y-auto">
+                    <h3 class="text-xs font-bold uppercase text-gray-400 tracking-wider mb-3">新配對</h3>
+                    <div id="matches-horizontal-list" class="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
+                        <!-- 橫向配對頭貼 -->
+                    </div>
+
+                    <h3 class="text-xs font-bold uppercase text-gray-400 tracking-wider mt-4 mb-2">訊息列表</h3>
+                    <div id="chat-list" class="space-y-2">
+                        <!-- 對話清單 -->
+                    </div>
+                </div>
+
+                <!-- TAB 3: 個人中心頁 (Profile) -->
+                <div id="tab-profile" class="tab-pane hidden absolute inset-0 flex flex-col p-6 overflow-y-auto items-center">
+                    <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-brand-400 shadow-md mb-3">
+                        <img id="profile-page-avatar" src="" class="w-full h-full object-cover">
+                    </div>
+                    <h3 id="profile-page-name" class="text-xl font-bold text-gray-900">--</h3>
+                    <p id="profile-page-location" class="text-xs text-gray-500 mt-0.5">--</p>
+                    <p id="profile-page-bio" class="text-sm text-gray-600 mt-2 text-center bg-white p-3 rounded-xl border border-brand-100 w-full shadow-sm">--</p>
+
+                    <div class="w-full mt-6 space-y-3">
+                        <button onclick="openProfileEdit()" class="w-full py-3 bg-white hover:bg-brand-50 text-gray-700 font-bold rounded-xl border border-brand-200 shadow-sm text-sm">
+                            編輯個人檔案
+                        </button>
+                        <button onclick="logout()" class="w-full py-3 bg-red-50 hover:bg-red-100 text-red-500 font-bold rounded-xl text-sm transition">
+                            登出帳號
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 底部導覽列 (Bottom Nav) -->
+            <nav class="bg-white border-t border-brand-100 h-16 flex items-center justify-around px-4 z-10">
+                <button onclick="switchTab('discover')" id="nav-btn-discover" class="flex flex-col items-center text-brand-600 transition">
+                    <i class="fa-solid fa-fire text-xl"></i>
+                    <span class="text-[10px] font-bold mt-1">探索</span>
+                </button>
+                <button onclick="switchTab('chats')" id="nav-btn-chats" class="flex flex-col items-center text-gray-400 hover:text-brand-600 transition">
+                    <i class="fa-solid fa-comments text-xl"></i>
+                    <span class="text-[10px] font-bold mt-1">聊天</span>
+                </button>
+                <button onclick="switchTab('profile')" id="nav-btn-profile" class="flex flex-col items-center text-gray-400 hover:text-brand-600 transition">
+                    <i class="fa-solid fa-user text-xl"></i>
+                    <span class="text-[10px] font-bold mt-1">我的</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- ================= 聊天室對話視窗 (Chat Room Modal) ================= -->
+        <div id="chat-room-modal" class="hidden absolute inset-0 bg-white z-30 flex flex-col">
+            <header class="px-4 py-3 bg-white border-b border-brand-100 flex items-center justify-between">
+                <button onclick="closeChatRoom()" class="text-gray-500 hover:text-gray-800 text-lg p-1">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <div class="flex items-center gap-2">
+                    <img id="chatroom-avatar" class="w-8 h-8 rounded-full object-cover">
+                    <span id="chatroom-name" class="font-bold text-sm">--</span>
+                </div>
+                <div class="w-6"></div>
+            </header>
+            <div id="chatroom-messages" class="flex-1 p-4 overflow-y-auto space-y-3 bg-brand-50/30">
+                <!-- 訊息氣泡 -->
+            </div>
+            <div class="p-3 bg-white border-t border-brand-100 flex items-center gap-2">
+                <input type="text" id="chat-input" placeholder="傳送訊息..." class="flex-1 px-4 py-2.5 rounded-full bg-brand-50 border border-brand-200 text-sm focus:outline-none focus:border-brand-500" onkeypress="if(event.key==='Enter') sendChatMessage()">
+                <button onclick="sendChatMessage()" class="w-10 h-10 bg-brand-500 hover:bg-brand-600 text-white rounded-full flex items-center justify-center shadow-md">
+                    <i class="fa-solid fa-paper-plane text-xs"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= 配對成功彈跳視窗 (Match Modal) ================= -->
+        <div id="match-modal" class="hidden absolute inset-0 bg-black/70 backdrop-blur-sm z-40 flex flex-col items-center justify-center p-6 text-white text-center">
+            <div class="text-brand-400 text-5xl font-black mb-2 animate-bounce">It's a Match! 🎉</div>
+            <p class="text-gray-200 text-sm mb-6">你與 <span id="match-target-name" class="font-bold text-white"></span> 互相喜歡了！</p>
+            <div class="flex items-center justify-center gap-4 mb-8">
+                <img id="match-my-img" class="w-20 h-20 rounded-full border-4 border-brand-400 object-cover shadow-lg">
+                <img id="match-target-img" class="w-20 h-20 rounded-full border-4 border-brand-400 object-cover shadow-lg">
+            </div>
+            <div class="w-full space-y-3 max-w-xs">
+                <button onclick="startChatFromMatch()" class="w-full py-3.5 bg-brand-500 hover:bg-brand-600 font-bold rounded-xl shadow-lg text-white">
+                    立即傳送訊息
+                </button>
+                <button onclick="closeMatchModal()" class="w-full py-3 bg-white/10 hover:bg-white/20 font-bold rounded-xl text-sm">
+                    繼續瀏覽
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- JavaScript 核心邏輯 -->
+    <script>
+        // 模擬候選人資料庫
+        let candidatePool = [
+            { id: 1, name: "Zoey", age: 24, location: "台北市", bio: "喜歡週末爬山、喝咖啡，尋找聊得來的朋友 ☕️⛰️", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500" },
+            { id: 2, name: "Kuan", age: 27, location: "新北市", bio: "軟體工程師 💻 貓奴 🐱 假日喜歡小酌與看展覽。", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500" },
+            { id: 3, name: "Evelyn", age: 23, location: "台中市", bio: "設計系大四生 🎨 喜歡底片相機與獨立音樂。", avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500" },
+            { id: 4, name: "Ethan", age: 29, location: "台北市", bio: "金融業 📊 熱愛健身與戶外水上活動。", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500" }
+        ];
+
+        // 應用程式狀態
+        let state = {
+            isRegistering: false,
+            currentUser: {
+                name: "Ting-Yu",
+                age: 26,
+                location: "台北市",
+                bio: "產品經理與科技愛好者，喜歡探索新事物！",
+                avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500"
+            },
+            currentIndex: 0,
+            matches: [], // 已配對清單
+            chats: {},   // 聊天記錄 { userId: [{sender: 'me'|'target', text: '...'}] }
+            activeChatUserId: null
+        };
+
+        // 初始化載入
+        window.onload = function() {
+            // 預載入大頭貼到設定頁與導覽列
+            updateUserUI();
+        };
+
+        // 切換登入 / 註冊模式
+        function toggleAuthMode() {
+            state.isRegistering = !state.isRegistering;
+            const nameField = document.getElementById('register-name-field');
+            const submitBtn = document.getElementById('auth-submit-btn');
+            const switchText = document.getElementById('auth-switch-text');
+            const switchBtn = document.getElementById('auth-switch-btn');
+
+            if (state.isRegistering) {
+                nameField.classList.remove('hidden');
+                submitBtn.innerText = "建立新帳號";
+                switchText.innerText = "已經有帳號了？";
+                switchBtn.innerText = "返回登入";
+            } else {
+                nameField.classList.add('hidden');
+                submitBtn.innerText = "登入帳號";
+                switchText.innerText = "還沒有帳號？";
+                switchBtn.innerText = "立即註冊";
+            }
+        }
+
+        // 登入或註冊送出
+        function handleAuthSubmit() {
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const nameInput = document.getElementById('auth-name').value;
+            const errorBox = document.getElementById('auth-error');
+
+            if (!email || !password || (state.isRegistering && !nameInput)) {
+                errorBox.innerText = "請完整填寫所有欄位";
+                errorBox.classList.remove('hidden');
+                return;
+            }
+            errorBox.classList.add('hidden');
+
+            if (state.isRegistering) {
+                state.currentUser.name = nameInput;
+                updateUserUI();
+                // 註冊後引導至個人檔案設定
+                document.getElementById('page-auth').classList.add('hidden');
+                document.getElementById('page-profile-setup').classList.remove('hidden');
+            } else {
+                // 直接進入主介面
+                enterMainApp();
+            }
+        }
+
+        // 圖片上傳處理 (Base64)
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    state.currentUser.avatar = e.target.result;
+                    document.getElementById('setup-avatar-preview').src = e.target.result;
+                    updateUserUI();
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // 儲存個人檔案並進入主畫面
+        function saveProfileAndStart() {
+            const name = document.getElementById('setup-name').value;
+            const age = document.getElementById('setup-age').value;
+            const location = document.getElementById('setup-location').value;
+            const bio = document.getElementById('setup-bio').value;
+
+            if (name) state.currentUser.name = name;
+            if (age) state.currentUser.age = age;
+            if (location) state.currentUser.location = location;
+            if (bio) state.currentUser.bio = bio;
+
+            updateUserUI();
+            document.getElementById('page-profile-setup').classList.add('hidden');
+            enterMainApp();
+        }
+
+        // 更新全域用戶 UI
+        function updateUserUI() {
+            document.getElementById('nav-user-avatar').src = state.currentUser.avatar;
+            document.getElementById('profile-page-avatar').src = state.currentUser.avatar;
+            document.getElementById('profile-page-name').textContent = `${state.currentUser.name}, ${state.currentUser.age || 25}`;
+            document.getElementById('profile-page-location').textContent = state.currentUser.location;
+            document.getElementById('profile-page-bio').textContent = state.currentUser.bio;
+
+            // 填入 Setup 初始值
+            document.getElementById('setup-name').value = state.currentUser.name;
+            document.getElementById('setup-age').value = state.currentUser.age;
+            document.getElementById('setup-location').value = state.currentUser.location;
+            document.getElementById('setup-bio').value = state.currentUser.bio;
+        }
+
+        // 進入主 App
+        function enterMainApp() {
+            document.getElementById('page-auth').classList.add('hidden');
+            document.getElementById('page-profile-setup').classList.add('hidden');
+            document.getElementById('main-app-layout').classList.remove('hidden');
+            renderDiscoverCard();
+        }
+
+        // 登出
+        function logout() {
+            document.getElementById('main-app-layout').classList.add('hidden');
+            document.getElementById('page-auth').classList.remove('hidden');
+        }
+
+        // 分頁切換
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+
+            // 更新導覽列圖示顏色
+            ['discover', 'chats', 'profile'].forEach(t => {
+                const btn = document.getElementById(`nav-btn-${t}`);
+                if (t === tabName) {
+                    btn.classList.remove('text-gray-400');
+                    btn.classList.add('text-brand-600');
+                } else {
+                    btn.classList.remove('text-brand-600');
+                    btn.classList.add('text-gray-400');
+                }
+            });
+
+            if (tabName === 'chats') {
+                renderMatchesAndChats();
+            }
+        }
+
+        // 渲染探索卡片
+        function renderDiscoverCard() {
+            const stack = document.getElementById('card-stack');
+            if (state.currentIndex >= candidatePool.length) {
+                stack.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full text-center p-6 text-gray-400">
+                        <i class="fa-solid fa-face-smile text-4xl mb-3 text-brand-400"></i>
+                        <p class="font-bold text-gray-700">目前附近沒有更多新對象了！</p>
+                        <p class="text-xs mt-1">請稍後再回來查看</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const candidate = candidatePool[state.currentIndex];
+            stack.innerHTML = `
+                <div class="relative w-full h-full">
+                    <img src="${candidate.avatar}" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-6 text-white">
+                        <h3 class="text-2xl font-black">${candidate.name}, ${candidate.age}</h3>
+                        <p class="text-xs text-brand-300 font-medium mb-1"><i class="fa-solid fa-location-dot mr-1"></i>${candidate.location}</p>
+                        <p class="text-sm text-gray-200 mt-1 line-clamp-2">${candidate.bio}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 滑動卡片邏輯 (left: 不喜歡, right: 喜歡)
+        function swipeCard(direction) {
+            if (state.currentIndex >= candidatePool.length) return;
+
+            const candidate = candidatePool[state.currentIndex];
+            state.currentIndex++;
+
+            if (direction === 'right') {
+                // 隨機模擬 60% 機率配對成功，增加互動樂趣
+                const isMatch = Math.random() < 0.7;
+                if (isMatch) {
+                    if (!state.matches.some(m => m.id === candidate.id)) {
+                        state.matches.push(candidate);
+                        showMatchModal(candidate);
+                    }
+                }
+            }
+            renderDiscoverCard();
+        }
+
+        // 顯示配對成功彈跳視窗
+        function showMatchModal(candidate) {
+            document.getElementById('match-target-name').textContent = candidate.name;
+            document.getElementById('match-my-img').src = state.currentUser.avatar;
+            document.getElementById('match-target-img').src = candidate.avatar;
+            document.getElementById('match-modal').classList.remove('hidden');
+            window.lastMatchedCandidate = candidate;
+        }
+
+        function closeMatchModal() {
+            document.getElementById('match-modal').classList.add('hidden');
+        }
+
+        function startChatFromMatch() {
+            closeMatchModal();
+            openChatRoom(window.lastMatchedCandidate);
+        }
+
+        // 渲染配對清單與聊天列表
+        function renderMatchesAndChats() {
+            const horizontalList = document.getElementById('matches-horizontal-list');
+            const chatList = document.getElementById('chat-list');
+
+            // 橫向配對頭貼
+            if (state.matches.length === 0) {
+                horizontalList.innerHTML = `<span class="text-xs text-gray-400 py-2">尚無新配對，快去探索喜歡新對象吧！</span>`;
+            } else {
+                horizontalList.innerHTML = state.matches.map(m => `
+                    <div onclick='openChatRoom(${JSON.stringify(m)})' class="flex flex-col items-center cursor-pointer flex-shrink-0">
+                        <div class="w-16 h-16 rounded-full p-0.5 bg-gradient-to-tr from-brand-400 to-brand-600 shadow-sm">
+                            <img src="${m.avatar}" class="w-full h-full rounded-full object-cover border-2 border-white">
+                        </div>
+                        <span class="text-xs font-bold mt-1 text-gray-700">${m.name}</span>
+                    </div>
+                `).join('');
+            }
+
+            // 聊天列表
+            if (state.matches.length === 0) {
+                chatList.innerHTML = `<div class="text-center text-gray-400 text-xs py-8">還沒有任何對話記錄</div>`;
+            } else {
+                chatList.innerHTML = state.matches.map(m => {
+                    const messages = state.chats[m.id] || [];
+                    const lastMsg = messages.length > 0 ? messages[messages.length - 1].text : "我們已經成功配對囉！打個招呼吧 👋";
+                    return `
+                        <div onclick='openChatRoom(${JSON.stringify(m)})' class="flex items-center gap-3 p-3 bg-white hover:bg-brand-50/50 rounded-2xl cursor-pointer transition border border-brand-100/50 shadow-sm">
+                            <img src="${m.avatar}" class="w-12 h-12 rounded-full object-cover shadow-inner">
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-bold text-sm text-gray-900">${m.name}</h4>
+                                <p class="text-xs text-gray-500 truncate mt-0.5">${lastMsg}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        // 開啟聊天室
+        let currentChatTarget = null;
+        function openChatRoom(target) {
+            currentChatTarget = target;
+            document.getElementById('chatroom-name').textContent = target.name;
+            document.getElementById('chatroom-avatar').src = target.avatar;
+            document.getElementById('chat-room-modal').classList.remove('hidden');
+            renderChatMessages();
+        }
+
+        function closeChatRoom() {
+            document.getElementById('chat-room-modal').classList.add('hidden');
+            renderMatchesAndChats();
+        }
+
+        // 渲染對話訊息
+        function renderChatMessages() {
+            const container = document.getElementById('chatroom-messages');
+            if (!currentChatTarget) return;
+            const messages = state.chats[currentChatTarget.id] || [];
+
+            if (messages.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-gray-400 text-xs my-8">
+                        與 ${currentChatTarget.name} 開始對話吧！
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = messages.map(msg => {
+                if (msg.sender === 'me') {
+                    return `
+                        <div class="flex justify-end">
+                            <div class="bg-brand-500 text-white text-sm px-4 py-2.5 rounded-2xl rounded-tr-none max-w-[75%] shadow-sm">
+                                ${msg.text}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="flex justify-start">
+                            <div class="bg-white text-gray-800 text-sm px-4 py-2.5 rounded-2xl rounded-tl-none max-w-[75%] shadow-sm border border-brand-100">
+                                ${msg.text}
+                            </div>
+                        </div>
+                    `;
+                }
+            }).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // 發送聊天訊息
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text || !currentChatTarget) return;
+
+            if (!state.chats[currentChatTarget.id]) {
+                state.chats[currentChatTarget.id] = [];
+            }
+
+            // 加入我的訊息
+            state.chats[currentChatTarget.id].push({ sender: 'me', text: text });
+            input.value = '';
+            renderChatMessages();
+
+            // 模擬對方自動回覆
+            setTimeout(() => {
+                const replies = ["哈哈，真的嗎？", "好有趣！你平時週末都在做什麼呢？", "這想法不錯耶 😊", "對啊！我也這麼覺得！"];
+                const randomReply = replies[Math.floor(Math.random() * replies.length)];
+                state.chats[currentChatTarget.id].push({ sender: 'target', text: randomReply });
+                renderChatMessages();
+            }, 1000);
+        }
+
+        function openProfileEdit() {
+            switchTab('profile');
+            // 這裡可以直接擴充點擊編輯個人檔案的互動
+            alert('你可以直接切換至此或上傳照片來隨時更新個人狀態！');
+        }
+    </script>
+</body>
+</html>
